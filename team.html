@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liollio Analytics — Team</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F4F1EA;--bg2:#EDE9DF;--bg3:#E4DFD3;--surface:#FDFCF9;
+    --border:#D4CEC4;--red:#D0061F;--text:#18150F;--text2:#56504A;
+    --text3:#9A9490;--green:#0F6130;--neg:#B8051B;
+    --font:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{font-size:14px;}body{background:var(--bg);color:var(--text);font-family:var(--font);}
+  header{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+  .header-inner{max-width:1500px;margin:0 auto;padding:0 20px;display:flex;align-items:center;height:48px;gap:32px;}
+  .brand{font-weight:600;font-size:1.1rem;color:var(--red);text-decoration:none;letter-spacing:-0.02em;}
+  nav{display:flex;}
+  nav a{font-size:0.82rem;color:var(--text2);text-decoration:none;padding:0 12px;height:48px;display:flex;align-items:center;border-bottom:2px solid transparent;transition:color 0.12s;}
+  nav a:hover{color:var(--text);}
+  nav a.active{color:var(--red);border-bottom-color:var(--red);font-weight:500;}
+  .header-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+  .season-sel{font-family:var(--font);font-size:0.8rem;color:var(--text2);background:var(--bg2);border:1px solid var(--border);padding:4px 8px;cursor:pointer;outline:none;}
+
+  .page{max-width:1200px;margin:0 auto;padding:0 20px 48px;}
+
+  /* TEAM HEADER */
+  .team-hero{background:var(--bg2);padding:20px 0 16px;}
+  .team-hero h1{font-size:1.4rem;font-weight:600;letter-spacing:-0.02em;color:var(--text);}
+  .team-hero .meta{font-size:0.78rem;color:var(--text3);margin-top:4px;font-family:var(--mono);}
+
+  /* SUMMARY STATS */
+  .summary-strip{background:var(--bg3);padding:12px 0;}
+  .summary-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:0;}
+  .stat-box{padding:10px 14px;border-right:1px solid var(--border);}
+  .stat-box:last-child{border-right:none;}
+  .stat-box .lbl{font-size:0.65rem;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3);font-weight:600;margin-bottom:4px;}
+  .stat-box .val{font-family:var(--mono);font-size:1.05rem;font-weight:500;color:var(--text);}
+  .stat-box .val.pos{color:var(--green);}
+  .stat-box .val.neg{color:var(--neg);}
+  .stat-box .val.red{color:var(--red);}
+
+  /* SECTION TABS */
+  .tabs{background:var(--surface);border-bottom:1px solid var(--border);display:flex;}
+  .tab{font-size:0.82rem;color:var(--text2);padding:0 16px;height:40px;display:flex;align-items:center;cursor:pointer;border-bottom:2px solid transparent;transition:color 0.12s;}
+  .tab:hover{color:var(--text);}
+  .tab.active{color:var(--red);border-bottom-color:var(--red);font-weight:500;}
+
+  /* STATS SECTION */
+  .section{display:none;padding:0;}
+  .section.active{display:block;}
+
+  .stats-section{background:var(--surface);}
+  .stat-group{margin-bottom:0;}
+  .stat-group-hdr{background:var(--bg2);padding:8px 0;font-size:0.68rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);border-top:1px solid var(--border);}
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--surface);}
+  .sstat{padding:10px 14px;border-right:1px solid var(--bg2);border-bottom:1px solid var(--bg2);}
+  .sstat .lbl{font-size:0.65rem;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);font-weight:500;margin-bottom:3px;}
+  .sstat .od{display:flex;gap:20px;}
+  .sstat .od-item{flex:1;}
+  .sstat .od-item .sub{font-size:0.6rem;color:var(--text3);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:2px;}
+  .sstat .od-item .v{font-family:var(--mono);font-size:0.88rem;color:var(--text);}
+  .sstat .single-val{font-family:var(--mono);font-size:0.88rem;color:var(--text);}
+
+  /* SCHEDULE SECTION */
+  .schedule-wrap{overflow-x:auto;background:var(--surface);}
+  table{width:100%;border-collapse:collapse;font-size:0.78rem;}
+  thead tr{background:var(--bg3);border-bottom:2px solid var(--border);}
+  th{font-family:var(--mono);font-size:0.68rem;font-weight:500;color:var(--text3);text-align:left;padding:7px 12px;white-space:nowrap;border-right:1px solid var(--border);}
+  th.r{text-align:right;}
+  tbody tr{border-bottom:1px solid var(--bg2);transition:background 0.08s;}
+  tbody tr:nth-child(even){background:#FAFAF6;}
+  tbody tr:hover{background:#F2EFE7 !important;}
+  td{padding:6px 12px;font-family:var(--mono);font-size:0.76rem;color:var(--text);white-space:nowrap;border-right:1px solid var(--bg2);}
+  td.r{text-align:right;}
+  td.result-w{color:var(--green);font-weight:500;}
+  td.result-l{color:var(--neg);font-weight:500;}
+  td.score{font-weight:500;}
+  td.opp a{color:var(--text2);text-decoration:none;}
+  td.opp a:hover{color:var(--red);}
+  td.unplayed{color:var(--text3);}
+
+  /* ROSTER SECTION */
+  .roster-table-wrap{overflow-x:auto;background:var(--surface);}
+
+  .loading{padding:60px 20px;text-align:center;font-size:0.85rem;color:var(--text3);font-family:var(--mono);}
+  footer{background:var(--bg2);border-top:1px solid var(--border);padding:12px 20px;}
+  .footer-inner{max-width:1500px;margin:0 auto;font-size:0.7rem;color:var(--text3);display:flex;justify-content:space-between;}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <a class="brand" href="index.html">Liollio Analytics</a>
+    <nav>
+      <a href="index.html">Ratings</a>
+      <a href="standings.html">Standings</a>
+      <a href="players.html">Players</a>
+    </nav>
+    <div class="header-right">
+      <select class="season-sel" id="seasonSel" onchange="changeSeason(this.value)"></select>
+    </div>
+  </div>
+</header>
+
+<div class="page">
+  <div class="loading" id="loading">Loading team data...</div>
+  <div id="content" style="display:none">
+
+    <div class="team-hero">
+      <h1 id="teamName">—</h1>
+      <div class="meta" id="teamMeta"></div>
+    </div>
+
+    <div class="summary-strip">
+      <div class="summary-grid" id="summaryGrid"></div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab active" onclick="showTab('stats',this)">Stats</div>
+      <div class="tab" onclick="showTab('schedule',this)">Schedule &amp; Results</div>
+      <div class="tab" onclick="showTab('roster',this)">Roster Stats</div>
+    </div>
+
+    <!-- STATS TAB -->
+    <div class="section active" id="tab-stats">
+      <div class="stats-section" id="statsContent"></div>
+    </div>
+
+    <!-- SCHEDULE TAB -->
+    <div class="section" id="tab-schedule">
+      <div class="schedule-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Rd</th><th>Date</th><th>H/A</th>
+              <th>Opponent</th>
+              <th class="r">Score</th><th class="r">Result</th>
+            </tr>
+          </thead>
+          <tbody id="schedBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ROSTER TAB -->
+    <div class="section" id="tab-roster">
+      <div class="roster-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Player</th><th class="r">GP</th><th class="r">Min</th>
+              <th class="r">PIR</th><th class="r">%Min</th>
+              <th class="r">Pts</th><th class="r">Reb</th><th class="r">Ast</th>
+              <th class="r">Stl</th><th class="r">Blk</th><th class="r">TOV</th>
+              <th class="r">eFG%</th><th class="r">TS%</th>
+              <th class="r">3PM-3PA</th><th class="r">3P%</th>
+              <th class="r">2PM-2PA</th><th class="r">2P%</th>
+              <th class="r">FTM-FTA</th><th class="r">FT%</th>
+            </tr>
+          </thead>
+          <tbody id="rosterBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <span>Liollio Analytics &mdash; Euroleague Basketball</span>
+    <span>Data via Euroleague API</span>
+  </div>
+</footer>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const teamName = decodeURIComponent(params.get('team')||'');
+let season = '2025';
+
+async function init() {
+  await loadSeasons();
+  await loadAll(season);
+}
+
+async function loadSeasons() {
+  try {
+    const d = await (await fetch('data/seasons.json')).json();
+    const sel = document.getElementById('seasonSel');
+    d.seasons.forEach(s=>{
+      const o=document.createElement('option');
+      o.value=s; o.textContent=d.season_labels[s]||s;
+      if(String(s)===String(d.current_season)){o.selected=true;season=String(s);}
+      sel.appendChild(o);
+    });
+  } catch(e){}
+}
+
+async function loadAll(s) {
+  try {
+    const [teamsD, playersD, schedD] = await Promise.all([
+      fetch(`data/${s}/teams.json`).then(r=>r.json()),
+      fetch(`data/${s}/players.json`).then(r=>r.json()),
+      fetch(`data/${s}/schedule.json`).then(r=>r.json()),
+    ]);
+
+    const team = (teamsD.teams||[]).find(t=>t.team===teamName);
+    if (!team) { document.getElementById('loading').textContent=`Team "${teamName}" not found.`; return; }
+
+    const players = (playersD.players||[]).filter(p=>p.team===teamName)
+      .sort((a,b)=>(b.pir||0)-(a.pir||0));
+    const games = (schedD.games||[]).filter(g=>g.home===teamName||g.away===teamName);
+
+    document.getElementById('loading').style.display='none';
+    document.getElementById('content').style.display='';
+    document.title = `${teamName} — Liollio Analytics`;
+
+    renderHero(team, teamsD.season_label||s);
+    renderSummary(team);
+    renderStats(team);
+    renderSchedule(games);
+    renderRoster(players);
+  } catch(e) {
+    document.getElementById('loading').textContent='Error loading data. Run pipeline.py first.';
+    console.error(e);
+  }
+}
+
+function changeSeason(v){season=v;loadAll(v);}
+
+function renderHero(t, label) {
+  document.getElementById('teamName').textContent = t.team;
+  document.getElementById('teamMeta').textContent =
+    `${label} · ${t.gp} games played · Liollio Analytics`;
+}
+
+function renderSummary(t) {
+  const items = [
+    {lbl:'PIR',     val:t.pir,     cls:'red'},
+    {lbl:'Net Rtg', val:(t.net_rtg>0?'+':'')+t.net_rtg?.toFixed(2), cls:t.net_rtg>0?'pos':'neg'},
+    {lbl:'O Eff',   val:t.o_eff?.toFixed(1)},
+    {lbl:'D Eff',   val:t.d_eff?.toFixed(1)},
+    {lbl:'Tempo',   val:t.tempo?.toFixed(1)},
+    {lbl:'Pts/G',   val:t.pts_pg},
+    {lbl:'Opp/G',   val:t.opp_pts_pg},
+  ];
+  const grid = document.getElementById('summaryGrid');
+  grid.innerHTML = '';
+  items.forEach(item=>{
+    const div=document.createElement('div');
+    div.className='stat-box';
+    div.innerHTML=`<div class="lbl">${item.lbl}</div><div class="val ${item.cls||''}">${item.val??'—'}</div>`;
+    grid.appendChild(div);
+  });
+}
+
+function renderStats(t) {
+  const groups = [
+    { lbl:'Four Factors', stats:[
+      {lbl:'eFG%',    o:t.o_efg,    d:t.d_efg},
+      {lbl:'TO%',     o:t.o_tov_pct,d:t.d_tov_pct},
+      {lbl:'OR%',     o:t.o_oreb_pct,d:t.d_oreb_pct},
+      {lbl:'FT/FGA',  o:t.o_fta_fga?.toFixed(2), d:t.d_fta_fga?.toFixed(2)},
+    ]},
+    { lbl:'Basics', stats:[
+      {lbl:'3P%',     o:t.o_3p_pct, d:t.d_3p_pct},
+      {lbl:'2P%',     o:t.o_2p_pct, d:t.d_2p_pct},
+      {lbl:'FT%',     o:t.o_ft_pct, d:t.d_ft_pct},
+      {lbl:'Blk%',    o:t.o_blk_pct,d:t.d_blk_pct},
+      {lbl:'Stl%',    o:t.o_stl_pct,d:t.d_stl_pct},
+      {lbl:'NST%',    o:t.o_nstov_pct,d:t.d_nstov_pct},
+    ]},
+    { lbl:'Characteristics', stats:[
+      {lbl:'3PA/FGA', o:t.o_3pa_fga,d:t.d_3pa_fga},
+      {lbl:'Ast/FGM', o:t.o_ast_fgm,d:t.d_ast_fgm},
+    ]},
+    { lbl:'Point Distribution', stats:[
+      {lbl:'3pt%',    o:t.o_pts_3_pct,d:t.d_pts_3_pct},
+      {lbl:'2pt%',    o:t.o_pts_2_pct,d:t.d_pts_2_pct},
+      {lbl:'FT%',     o:t.o_pts_ft_pct,d:t.d_pts_ft_pct},
+    ]},
+  ];
+
+  const container = document.getElementById('statsContent');
+  container.innerHTML = '';
+
+  groups.forEach(g=>{
+    const hdr=document.createElement('div');
+    hdr.className='stat-group-hdr'; hdr.textContent=g.lbl;
+    container.appendChild(hdr);
+
+    const grid=document.createElement('div');
+    grid.className='stats-grid';
+
+    g.stats.forEach(s=>{
+      const box=document.createElement('div');
+      box.className='sstat';
+      const ov = s.o!=null ? (typeof s.o==='number'?s.o.toFixed(1):s.o) : '—';
+      const dv = s.d!=null ? (typeof s.d==='number'?s.d.toFixed(1):s.d) : '—';
+      box.innerHTML=`
+        <div class="lbl">${s.lbl}</div>
+        <div class="od">
+          <div class="od-item"><div class="sub">OFF</div><div class="v">${ov}</div></div>
+          <div class="od-item"><div class="sub">DEF</div><div class="v">${dv}</div></div>
+        </div>`;
+      grid.appendChild(box);
+    });
+    container.appendChild(grid);
+  });
+}
+
+function renderSchedule(games) {
+  const tbody = document.getElementById('schedBody');
+  tbody.innerHTML = '';
+  const sorted = [...games].sort((a,b)=>(a.round||0)-(b.round||0));
+
+  sorted.forEach(g=>{
+    const isHome = g.home===teamName;
+    const opp = isHome ? g.away : g.home;
+    const tr = document.createElement('tr');
+
+    if (!g.played) {
+      tr.innerHTML=`
+        <td>${g.round||'—'}</td>
+        <td>${g.date?g.date.slice(0,10):'TBD'}</td>
+        <td>${isHome?'H':'A'}</td>
+        <td class="opp"><a href="team.html?team=${encodeURIComponent(opp)}">${opp||'—'}</a></td>
+        <td class="r unplayed" colspan="2">—</td>`;
+    } else {
+      const myScore  = isHome ? g.home_score : g.away_score;
+      const oppScore = isHome ? g.away_score : g.home_score;
+      const win = myScore > oppScore;
+      tr.innerHTML=`
+        <td>${g.round||'—'}</td>
+        <td>${g.date?g.date.slice(0,10):'—'}</td>
+        <td>${isHome?'H':'A'}</td>
+        <td class="opp"><a href="team.html?team=${encodeURIComponent(opp)}">${opp||'—'}</a></td>
+        <td class="r score">${myScore} - ${oppScore}</td>
+        <td class="r ${win?'result-w':'result-l'}">${win?'W':'L'}</td>`;
+    }
+    tbody.appendChild(tr);
+  });
+}
+
+function renderRoster(players) {
+  const tbody = document.getElementById('rosterBody');
+  tbody.innerHTML = '';
+  players.forEach(p=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`
+      <td style="text-align:left;font-family:var(--font);font-weight:500">${p.name||'—'}</td>
+      <td class="r">${p.gp||'—'}</td>
+      <td class="r">${p.min_pg?.toFixed(1)||'—'}</td>
+      <td class="r" style="font-weight:600">${p.pir?.toFixed(1)||'—'}</td>
+      <td class="r">${p.pct_min?.toFixed(1)||'—'}</td>
+      <td class="r">${p.pts_pg?.toFixed(1)||'—'}</td>
+      <td class="r">${p.reb_pg?.toFixed(1)||'—'}</td>
+      <td class="r">${p.ast_pg?.toFixed(1)||'—'}</td>
+      <td class="r">${p.stl_pg?.toFixed(1)||'—'}</td>
+      <td class="r">${p.blk_pg?.toFixed(1)||'—'}</td>
+      <td class="r">${p.tov_pg?.toFixed(1)||'—'}</td>
+      <td class="r">${p.efg?.toFixed(1)||'—'}</td>
+      <td class="r">${p.ts?.toFixed(1)||'—'}</td>
+      <td class="r">${(p.fg3m_pg||0).toFixed(1)}-${(p.fg3a_pg||0).toFixed(1)}</td>
+      <td class="r">${p.fg3_pct?.toFixed(1)||'—'}</td>
+      <td class="r">${(p.fg2m_pg||0).toFixed(1)}-${(p.fg2a_pg||0).toFixed(1)}</td>
+      <td class="r">${p.fg2_pct?.toFixed(1)||'—'}</td>
+      <td class="r">${(p.ftm_pg||0).toFixed(1)}-${(p.fta_pg||0).toFixed(1)}</td>
+      <td class="r">${p.ft_pct?.toFixed(1)||'—'}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function showTab(name, el) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+  el.classList.add('active');
+}
+
+init();
+</script>
+</body>
+</html>
