@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liollio Analytics — Players</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F4F1EA;--bg2:#EDE9DF;--bg3:#E4DFD3;--surface:#FDFCF9;
+    --border:#D4CEC4;--red:#D0061F;--text:#18150F;--text2:#56504A;
+    --text3:#9A9490;--green:#0F6130;--neg:#B8051B;
+    --font:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{font-size:14px;}body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;display:flex;flex-direction:column;}
+  header{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+  .header-inner{max-width:1500px;margin:0 auto;padding:0 20px;display:flex;align-items:center;height:48px;gap:32px;}
+  .brand{font-weight:600;font-size:1.1rem;color:var(--red);text-decoration:none;letter-spacing:-0.02em;white-space:nowrap;flex-shrink:0;}
+  nav{display:flex;}
+  nav a{font-size:0.82rem;color:var(--text2);text-decoration:none;padding:0 12px;height:48px;display:flex;align-items:center;border-bottom:2px solid transparent;transition:color 0.12s;}
+  nav a:hover{color:var(--text);}
+  nav a.active{color:var(--red);border-bottom-color:var(--red);font-weight:500;}
+  .header-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+  .season-sel{font-family:var(--font);font-size:0.8rem;color:var(--text2);background:var(--bg2);border:1px solid var(--border);padding:4px 8px;cursor:pointer;outline:none;}
+  .updated-txt{font-size:0.72rem;color:var(--text3);font-family:var(--mono);}
+  .page{flex:1;max-width:1500px;margin:0 auto;padding:0 20px 48px;}
+  .title-strip{background:var(--bg2);padding:12px 20px 10px;}
+  .title-strip h1{font-size:0.85rem;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text2);}
+  .title-strip p{font-size:0.75rem;color:var(--text3);margin-top:3px;}
+
+  /* filter bar */
+  .filter-bar{background:var(--bg3);padding:7px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .filter-bar label{font-size:0.72rem;color:var(--text3);}
+  .filter-bar input,.filter-bar select{
+    font-family:var(--font);font-size:0.78rem;color:var(--text);
+    background:var(--surface);border:1px solid var(--border);
+    padding:4px 8px;outline:none;
+  }
+  .filter-bar input{width:160px;}
+  .min-gp-wrap{display:flex;align-items:center;gap:6px;}
+
+  .table-wrap{overflow-x:auto;background:var(--surface);}
+  table{width:100%;border-collapse:collapse;font-size:0.78rem;}
+  thead{position:static;}
+  thead tr{background:var(--bg3);border-bottom:2px solid var(--border);}
+  th{font-family:var(--mono);font-size:0.68rem;font-weight:500;color:var(--text3);text-align:right;padding:7px 10px;white-space:nowrap;border-right:1px solid var(--border);letter-spacing:0.02em;cursor:pointer;user-select:none;}
+  th:hover{color:var(--text);background:var(--bg2);}
+  th.sorted{color:var(--red);background:#F9ECED;}
+  th.sort-desc::after{content:' ↓';color:var(--red);}
+  th.sort-asc::after{content:' ↑';color:var(--red);}
+  th.name-h{text-align:left;min-width:180px;}
+  th.team-h{text-align:left;min-width:160px;}
+  tbody tr{border-bottom:1px solid var(--bg2);transition:background 0.08s;}
+  tbody tr:nth-child(even){background:#FAFAF6;}
+  tbody tr:hover{background:#F2EFE7 !important;}
+  td{padding:6px 10px;text-align:right;font-family:var(--mono);font-size:0.76rem;color:var(--text);white-space:nowrap;border-right:1px solid var(--bg2);}
+  td.rk{text-align:center;color:var(--text3);font-size:0.7rem;width:32px;}
+  td.name-col{text-align:left;font-family:var(--font);font-weight:500;font-size:0.82rem;}
+  td.team-col{text-align:left;font-family:var(--font);font-size:0.78rem;color:var(--text2);}
+  td.team-col a{color:var(--red);text-decoration:none;}
+  td.team-col a:hover{text-decoration:underline;}
+  td.pir{font-weight:600;}
+  .loading{padding:40px 20px;text-align:center;font-size:0.85rem;color:var(--text3);font-family:var(--mono);}
+  .count-txt{font-size:0.72rem;color:var(--text3);padding:6px 20px;font-family:var(--mono);}
+  footer{background:var(--bg2);border-top:1px solid var(--border);padding:12px 20px;}
+  .footer-inner{max-width:1500px;margin:0 auto;font-size:0.7rem;color:var(--text3);display:flex;justify-content:space-between;}
+    nav a{padding:0 8px;font-size:0.78rem;}
+    .season-sel{font-size:0.75rem;padding:3px 6px;}
+  }
+
+  @media(max-width:640px){
+    html{font-size:12px;}
+    .header-inner{height:44px;gap:0;padding:0 12px;}
+    .brand{font-size:0.9rem;margin-right:8px;white-space:nowrap;}
+    nav a{padding:0 7px;font-size:0.75rem;height:44px;}
+    .header-right{gap:8px;}
+    .season-sel{font-size:0.72rem;padding:3px 5px;}
+    .updated-txt{display:none;}
+    .title-strip{padding:10px 12px 8px;}
+    .filter-bar{padding:6px 12px;flex-wrap:wrap;gap:6px;}
+    .filter-bar label{font-size:0.72rem;}
+    .filter-bar input,.filter-bar select{font-size:0.72rem;padding:3px 5px;}
+    .count-txt{padding:4px 12px;font-size:0.68rem;}
+    table th{font-size:0.62rem;padding:5px 6px;}
+    table td{font-size:0.7rem;padding:5px 6px;}
+    footer{padding:10px 12px;}
+    .footer-inner{flex-direction:column;gap:2px;font-size:0.65rem;}
+  }
+
+  @media(max-width:640px){
+    header{position:fixed;top:0;left:0;right:0;z-index:200;}
+    body{padding-top:44px;}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <a class="brand" href="index.html">Liollio Analytics</a>
+    <nav>
+      <a href="index.html">Ratings</a>
+      <a href="standings.html">Standings</a>
+      <a href="players.html" class="active">Players</a>
+    </nav>
+    <div class="header-right">
+      <select class="season-sel" id="seasonSel" onchange="changeSeason(this.value)"></select>
+      <span class="updated-txt" id="updTxt"></span>
+    </div>
+  </div>
+</header>
+
+<div class="page">
+  <div class="title-strip">
+    <h1>Player Stats &mdash; <span id="seasonLbl">2025-26</span></h1>
+    <p>Per-game averages &bull; Click column headers to sort</p>
+  </div>
+
+  <div class="filter-bar">
+    <label>Search:</label>
+    <input type="text" id="searchBox" placeholder="Player or team..." oninput="applyFilters()">
+    <label>Team:</label>
+    <select id="teamFilter" onchange="applyFilters()"><option value="">All Teams</option></select>
+    <div class="min-gp-wrap">
+      <label>Min GP:</label>
+      <input type="number" id="minGP" value="5" min="1" max="34" style="width:60px" oninput="applyFilters()">
+    </div>
+  </div>
+
+  <div class="count-txt" id="countTxt"></div>
+  <div id="loading" class="loading">Loading player data...</div>
+  <div class="table-wrap" id="tableWrap" style="display:none">
+    <table id="tbl">
+      <thead>
+        <tr id="hdr"></tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <span>Liollio Analytics &mdash; Euroleague Basketball</span>
+    <span>Data via Euroleague API</span>
+  </div>
+</footer>
+
+<script>
+const PCOLS = [
+  {key:'rk',    lbl:'RK',       fmt:'int', cls:'rk'},
+  {key:'name',  lbl:'Player',   fmt:'name',cls:'name-col'},
+  {key:'team',  lbl:'Team',     fmt:'team',cls:'team-col'},
+  {key:'gp',    lbl:'GP',       fmt:'int', tip:'Games played'},
+  {key:'min_pg',lbl:'Min',      fmt:'f1',  tip:'Minutes per game'},
+  {key:'pir',   lbl:'PIR',      fmt:'f1',  cls:'pir', tip:'Performance Index Rating per game'},
+  {key:'pct_min',lbl:'%Min',    fmt:'f1',  tip:'% of team minutes played'},
+  {key:'pts_pg', lbl:'Pts',     fmt:'f1',  tip:'Points per game'},
+  {key:'reb_pg', lbl:'Reb',     fmt:'f1',  tip:'Rebounds per game'},
+  {key:'ast_pg', lbl:'Ast',     fmt:'f1',  tip:'Assists per game'},
+  {key:'stl_pg', lbl:'Stl',     fmt:'f1',  tip:'Steals per game'},
+  {key:'blk_pg', lbl:'Blk',     fmt:'f1',  tip:'Blocks per game'},
+  {key:'tov_pg', lbl:'TOV',     fmt:'f1',  tip:'Turnovers per game'},
+  {key:'efg',    lbl:'eFG%',    fmt:'f1',  tip:'Effective field goal %'},
+  {key:'ts',     lbl:'TS%',     fmt:'f1',  tip:'True shooting %'},
+  {key:'fg3',    lbl:'3PM-3PA', fmt:'shot',tip:'3-pointers made-attempted per game'},
+  {key:'fg3_pct',lbl:'3P%',     fmt:'f1',  tip:'3-point %'},
+  {key:'fg2',    lbl:'2PM-2PA', fmt:'shot2',tip:'2-pointers made-attempted per game'},
+  {key:'fg2_pct',lbl:'2P%',     fmt:'f1',  tip:'2-point %'},
+  {key:'ft',     lbl:'FTM-FTA', fmt:'ft',  tip:'Free throws made-attempted per game'},
+  {key:'ft_pct', lbl:'FT%',     fmt:'f1',  tip:'Free throw %'},
+];
+
+let allPlayers=[], filtered=[], sortKey='pir', sortDir=-1, season='2025';
+
+async function init() {
+  await loadSeasons();
+  await loadData(season);
+}
+
+async function loadSeasons() {
+  try {
+    const d = await (await fetch('data/seasons.json')).json();
+    const sel = document.getElementById('seasonSel');
+    d.seasons.forEach(s=>{
+      const o=document.createElement('option');
+      o.value=s; o.textContent=d.season_labels[s]||s;
+      if(String(s)===String(d.current_season)){o.selected=true;season=String(s);}
+      sel.appendChild(o);
+    });
+  } catch(e){}
+}
+
+async function loadData(s) {
+  try {
+    const d = await (await fetch(`data/${s}/players.json`)).json();
+    allPlayers = d.players||[];
+    document.getElementById('seasonLbl').textContent = d.season_label||s;
+    if(d.updated){
+      const dt=new Date(d.updated);
+      document.getElementById('updTxt').textContent='Updated '+
+        dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    }
+    populateTeamFilter();
+    applyFilters();
+    buildHeader();
+    document.getElementById('loading').style.display='none';
+    document.getElementById('tableWrap').style.display='';
+  } catch(e){
+    document.getElementById('loading').textContent='No player data. Run pipeline.py first.';
+  }
+}
+
+function changeSeason(v){season=v;loadData(v);}
+
+function populateTeamFilter() {
+  // Collect all individual teams from semicolon-separated team history
+  const teamSet = new Set();
+  allPlayers.forEach(p => {
+    (p.team||'').split(';').map(t=>t.trim()).filter(Boolean).forEach(t=>teamSet.add(t));
+  });
+  const teams = [...teamSet].sort();
+  const sel = document.getElementById('teamFilter');
+  sel.innerHTML = '<option value="">All Teams</option>';
+  teams.forEach(t=>{
+    const o=document.createElement('option');
+    o.value=t; o.textContent=t; sel.appendChild(o);
+  });
+}
+
+function applyFilters() {
+  const q = document.getElementById('searchBox').value.toLowerCase();
+  const team = document.getElementById('teamFilter').value;
+  const minGP = parseInt(document.getElementById('minGP').value)||0;
+
+  filtered = allPlayers.filter(p => {
+    if(p.gp < minGP) return false;
+    if(team && !(p.team||'').split(';').map(t=>t.trim()).includes(team)) return false;
+    if(q && !p.name?.toLowerCase().includes(q) && !p.team?.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  document.getElementById('countTxt').textContent =
+    `Showing ${filtered.length} of ${allPlayers.length} players`;
+  renderBody();
+}
+
+function buildHeader() {
+  const hdr = document.getElementById('hdr');
+  hdr.innerHTML = '';
+  PCOLS.forEach(c => {
+    const th = document.createElement('th');
+    th.textContent = c.lbl;
+    if(c.tip) th.title = c.tip;
+    if(c.cls?.includes('name')) th.classList.add('name-h');
+    if(c.cls?.includes('team')) th.classList.add('team-h');
+    if(c.key===sortKey) { th.classList.add('sorted'); th.classList.add(sortDir===-1?'sort-desc':'sort-asc'); }
+    if(c.key!=='rk') th.addEventListener('click',()=>sortBy(c.key));
+    hdr.appendChild(th);
+  });
+}
+
+function renderBody() {
+  const sorted = [...filtered].sort((a,b)=>{
+    const av=a[sortKey]??-Infinity, bv=b[sortKey]??-Infinity;
+    return sortDir*(av-bv);
+  });
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  sorted.forEach((p,i)=>{
+    const tr = document.createElement('tr');
+    PCOLS.forEach(c=>{
+      const td = document.createElement('td');
+      if(c.cls) td.classList.add(c.cls);
+      if(c.key==='rk') { td.textContent=i+1; }
+      else if(c.key==='name') { td.textContent=p.name||'—'; }
+      else if(c.key==='team') {
+        const teams = (p.team||'').split(';').map(t=>t.trim()).filter(Boolean);
+        if(teams.length===0){ td.textContent='—'; }
+        else {
+          teams.forEach((t,i)=>{
+            if(i>0){ const sep=document.createElement('span'); sep.textContent=' / '; sep.style.color='var(--text3)'; td.appendChild(sep); }
+            const a=document.createElement('a');
+            a.href=`team.html?team=${encodeURIComponent(t)}`;
+            a.textContent=t; td.appendChild(a);
+          });
+        }
+      }
+      else if(c.fmt==='shot')  { td.textContent=`${(p.fg3m_pg||0).toFixed(1)}-${(p.fg3a_pg||0).toFixed(1)}`; }
+      else if(c.fmt==='shot2') { td.textContent=`${(p.fg2m_pg||0).toFixed(1)}-${(p.fg2a_pg||0).toFixed(1)}`; }
+      else if(c.fmt==='ft')    { td.textContent=`${(p.ftm_pg||0).toFixed(1)}-${(p.fta_pg||0).toFixed(1)}`; }
+      else {
+        const v=p[c.key];
+        if(v==null){td.textContent='—';td.style.color='var(--text3)';}
+        else td.textContent = c.fmt==='int' ? Math.round(v) : parseFloat(v).toFixed(1);
+      }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+function sortBy(k) {
+  sortDir = (sortKey===k) ? sortDir*-1 : -1;
+  sortKey = k;
+  buildHeader();
+  renderBody();
+}
+
+init();
+</script>
+</body>
+</html>
