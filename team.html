@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liollio Analytics — Team</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#F4F1EA;--bg2:#EDE9DF;--bg3:#E4DFD3;--surface:#FDFCF9;
+    --border:#D4CEC4;--red:#D0061F;--text:#18150F;--text2:#56504A;
+    --text3:#9A9490;--green:#0F6130;--neg:#B8051B;
+    --rank-good-bg:#E6F4EC;--rank-good:#0F6130;
+    --rank-bad-bg:#FDECEA;--rank-bad:#B8051B;
+    --rank-mid-bg:#F4F1EA;--rank-mid:#56504A;
+    --font:'IBM Plex Sans',sans-serif;--mono:'IBM Plex Mono',monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{font-size:14px;}body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;display:flex;flex-direction:column;}
+
+  /* HEADER */
+  header{background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+  .header-inner{max-width:1200px;margin:0 auto;padding:0 20px;display:flex;align-items:center;height:48px;gap:32px;}
+  .brand{font-weight:600;font-size:1.1rem;color:var(--red);text-decoration:none;letter-spacing:-0.02em;white-space:nowrap;flex-shrink:0;}
+  nav{display:flex;}
+  nav a{font-size:0.82rem;color:var(--text2);text-decoration:none;padding:0 12px;height:48px;display:flex;align-items:center;border-bottom:2px solid transparent;transition:color 0.12s;}
+  nav a:hover{color:var(--text);}
+  nav a.active{color:var(--red);border-bottom-color:var(--red);font-weight:500;}
+  .header-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+  .season-sel{font-family:var(--font);font-size:0.8rem;color:var(--text2);background:var(--bg2);border:1px solid var(--border);padding:4px 8px;cursor:pointer;outline:none;}
+
+  /* PAGE */
+  .page{flex:1;max-width:1200px;margin:0 auto;padding:0 20px 48px;}
+
+  /* TEAM HERO */
+  .team-hero{background:var(--bg2);padding:16px 20px 14px;border-bottom:2px solid var(--red);}
+  .team-hero h1{font-size:1.3rem;font-weight:600;letter-spacing:-0.02em;}
+  .team-hero .sub{font-size:0.78rem;color:var(--text3);margin-top:3px;font-family:var(--mono);}
+
+  /* SUMMARY STRIP */
+  .summary-strip{background:var(--bg3);border-bottom:1px solid var(--border);}
+  .summary-grid{display:grid;grid-template-columns:repeat(7,1fr);}
+  .sbox{padding:10px 20px;border-right:1px solid var(--border);}
+  .sbox:last-child{border-right:none;}
+  .sbox .lbl{font-size:0.62rem;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3);font-weight:600;margin-bottom:3px;}
+  .sbox .val{font-family:var(--mono);font-size:1.0rem;font-weight:500;}
+  .sbox .val.red{color:var(--red);}
+  .sbox .val.pos{color:var(--green);}
+  .sbox .val.neg{color:var(--neg);}
+
+  /* SECTION HEADER */
+  .sec-hdr{background:var(--bg2);padding:8px 20px;font-size:0.68rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-top:0;}
+
+  /* STAT BLOCKS GRID */
+  .stat-blocks{background:var(--surface);}
+  .stat-group{margin-bottom:0;}
+  .stat-table{width:100%;border-collapse:collapse;table-layout:fixed;}
+  .stat-table th{font-size:0.68rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text);padding:6px 20px;text-align:right;background:var(--bg3);border-bottom:1px solid var(--border);border-right:1px solid var(--border);}
+  .stat-table th:first-child{text-align:left;width:200px;padding-left:20px;}
+  .stat-table th.off-h{color:var(--green);width:calc(50% - 100px);}
+  .stat-table th.def-h{color:var(--neg);width:calc(50% - 100px);}
+  .stat-table tbody tr{border-bottom:1px solid var(--bg2);}
+  .stat-table tbody tr:hover{background:#F5F2EA;}
+  .stat-table td{padding:7px 20px;font-family:var(--mono);font-size:0.8rem;text-align:right;border-right:1px solid var(--bg2);}
+  .stat-table td:first-child{text-align:left;font-family:var(--font);font-size:0.8rem;color:var(--text2);padding-left:20px;}
+  .stat-table td.stat-val{font-weight:500;color:var(--text);}
+
+  /* RANK BADGE */
+  .rk{display:inline-block;font-family:var(--mono);font-size:0.62rem;font-weight:500;padding:1px 5px;margin-left:5px;vertical-align:middle;}
+  .rk.good{background:var(--rank-good-bg);color:var(--rank-good);}
+  .rk.bad {background:var(--rank-bad-bg); color:var(--rank-bad);}
+  .rk.mid {background:var(--rank-mid-bg); color:var(--rank-mid);}
+
+  /* SCHEDULE */
+  .schedule-wrap{background:var(--surface);overflow-x:auto;}
+  table.sched{width:100%;border-collapse:collapse;font-size:0.8rem;}
+  table.sched thead tr{background:var(--bg3);border-bottom:2px solid var(--border);}
+  table.sched th{font-family:var(--mono);font-size:0.68rem;font-weight:500;color:var(--text3);padding:7px 12px;white-space:nowrap;border-right:1px solid var(--border);text-align:left;}
+  table.sched th.r{text-align:right;}
+  table.sched tbody tr{border-bottom:1px solid var(--bg2);}
+  table.sched tbody tr:hover{background:#F5F2EA;}
+  table.sched td{padding:6px 12px;font-family:var(--mono);font-size:0.78rem;color:var(--text);white-space:nowrap;border-right:1px solid var(--bg2);}
+  table.sched td.r{text-align:right;}
+  table.sched td.w{color:var(--green);font-weight:500;}
+  table.sched td.l{color:var(--neg);font-weight:500;}
+  table.sched td.opp a{color:var(--text2);text-decoration:none;}
+  table.sched td.opp a:hover{color:var(--red);}
+  table.sched td.unplayed{color:var(--text3);}
+  .ha-badge{font-size:0.65rem;background:var(--bg3);padding:1px 5px;color:var(--text3);}
+
+  .loading{padding:60px 20px;text-align:center;font-size:0.85rem;color:var(--text3);font-family:var(--mono);}
+  footer{background:var(--bg2);border-top:1px solid var(--border);padding:12px 20px;margin-top:0;}
+  .footer-inner{max-width:1200px;margin:0 auto;font-size:0.7rem;color:var(--text3);display:flex;justify-content:space-between;}
+
+  
+
+  /* ROSTER TABLE */
+  .roster-wrap{background:var(--surface);overflow-x:auto;}
+  table.roster{width:100%;border-collapse:collapse;font-size:0.8rem;}
+  table.roster thead tr{background:var(--bg3);border-bottom:2px solid var(--border);}
+  table.roster th{font-family:var(--mono);font-size:0.68rem;font-weight:600;color:var(--text);padding:7px 12px;white-space:nowrap;border-right:1px solid var(--border);text-align:right;cursor:pointer;user-select:none;}
+  table.roster th:first-child{text-align:left;width:200px;}
+  table.roster th.sorted{color:var(--red);}
+  table.roster th.sort-desc::after{content:' ↓';color:var(--red);}
+  table.roster th.sort-asc::after{content:' ↑';color:var(--red);}
+  table.roster tbody tr{border-bottom:1px solid var(--bg2);}
+  table.roster tbody tr:hover{background:#F5F2EA;}
+  table.roster td{padding:6px 12px;font-family:var(--mono);font-size:0.78rem;color:var(--text);text-align:right;white-space:nowrap;border-right:1px solid var(--bg2);}
+  table.roster td:first-child{text-align:left;font-family:var(--font);font-size:0.82rem;font-weight:500;}
+
+  @media(max-width:700px){
+    header{position:fixed!important;top:0;left:0;right:0;z-index:200;}
+    body{padding-top:44px!important;}
+    .header-inner{height:44px!important;padding:0 10px!important;gap:0!important;}
+    .brand{font-size:0.82rem!important;white-space:nowrap;flex-shrink:0;margin-right:4px;}
+    nav a{padding:0 5px!important;font-size:0.72rem!important;height:44px!important;white-space:nowrap;}
+    .header-right{flex-shrink:0;gap:4px;margin-left:auto;}
+    .season-sel{font-size:0.68rem!important;padding:2px 4px!important;}
+    .updated-txt{display:none!important;}
+    footer{padding:10px 12px!important;}
+    .footer-inner{flex-direction:column!important;gap:2px;font-size:0.65rem!important;}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <a class="brand" href="index.html">Liollio Analytics</a>
+    <nav>
+      <a href="index.html">Ratings</a>
+      <a href="standings.html">Standings</a>
+      <a href="players.html">Players</a>
+    </nav>
+    <div class="header-right">
+      <select class="season-sel" id="seasonSel" onchange="changeSeason(this.value)"></select>
+    </div>
+  </div>
+</header>
+
+<div class="page">
+  <div class="loading" id="loading">Loading team data...</div>
+  <div id="content" style="display:none">
+
+    <div class="team-hero">
+      <h1 id="teamName">—</h1>
+      <div class="sub" id="teamSub"></div>
+    </div>
+
+    <div class="summary-strip">
+      <div class="summary-grid" id="summaryGrid"></div>
+    </div>
+
+    <!-- EFFICIENCY -->
+    <div class="sec-hdr">Efficiency</div>
+    <div class="stat-blocks">
+      <table class="stat-table" id="effTable">
+        <thead><tr>
+          <th></th>
+          <th class="off-h">Offense</th>
+          <th class="def-h">Defense</th>
+        </tr></thead>
+        <tbody id="effBody"></tbody>
+      </table>
+    </div>
+
+    <!-- FOUR FACTORS -->
+    <div class="sec-hdr">Four Factors</div>
+    <div class="stat-blocks">
+      <table class="stat-table" id="ffTable">
+        <thead><tr>
+          <th></th>
+          <th class="off-h">Offense</th>
+          <th class="def-h">Defense</th>
+        </tr></thead>
+        <tbody id="ffBody"></tbody>
+      </table>
+    </div>
+
+    <!-- BASICS -->
+    <div class="sec-hdr">Basics</div>
+    <div class="stat-blocks">
+      <table class="stat-table" id="basicsTable">
+        <thead><tr>
+          <th></th>
+          <th class="off-h">Offense</th>
+          <th class="def-h">Defense</th>
+        </tr></thead>
+        <tbody id="basicsBody"></tbody>
+      </table>
+    </div>
+
+    <!-- CHARACTERISTICS -->
+    <div class="sec-hdr">Characteristics</div>
+    <div class="stat-blocks">
+      <table class="stat-table" id="charTable">
+        <thead><tr>
+          <th></th>
+          <th class="off-h">Offense</th>
+          <th class="def-h">Defense</th>
+        </tr></thead>
+        <tbody id="charBody"></tbody>
+      </table>
+    </div>
+
+    <!-- POINT DISTRIBUTION -->
+    <div class="sec-hdr">Point Distribution</div>
+    <div class="stat-blocks">
+      <table class="stat-table" id="pdTable">
+        <thead><tr>
+          <th></th>
+          <th class="off-h">Offense</th>
+          <th class="def-h">Defense</th>
+        </tr></thead>
+        <tbody id="pdBody"></tbody>
+      </table>
+    </div>
+
+    <!-- ROSTER -->
+    <div class="sec-hdr">Roster &amp; Player Stats</div>
+    <div class="roster-wrap">
+      <table class="roster" id="rosterTbl">
+        <thead>
+          <tr id="rosterHdr"></tr>
+        </thead>
+        <tbody id="rosterBody"></tbody>
+      </table>
+    </div>
+
+    <!-- SCHEDULE -->
+    <div class="sec-hdr">Schedule &amp; Results</div>
+    <div class="schedule-wrap">
+      <table class="sched">
+        <thead>
+          <tr>
+            <th>Rd</th><th>Date</th><th>H/A</th>
+            <th>Opponent</th>
+            <th class="r">Score</th><th class="r">Result</th>
+          </tr>
+        </thead>
+        <tbody id="schedBody"></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <span>Liollio Analytics &mdash; Euroleague Basketball</span>
+    <span>Data via Euroleague API</span>
+  </div>
+</footer>
+
+<script>
+const params   = new URLSearchParams(window.location.search);
+const teamName = decodeURIComponent(params.get('team') || '');
+let season = '2025';
+
+async function init() {
+  await loadSeasons();
+  await loadAll(season);
+}
+
+async function loadSeasons() {
+  try {
+    const d = await (await fetch('data/seasons.json')).json();
+    const sel = document.getElementById('seasonSel');
+    d.seasons.forEach(s => {
+      const o = document.createElement('option');
+      o.value = s; o.textContent = d.season_labels[s] || s;
+      if (String(s) === String(d.current_season)) { o.selected = true; season = String(s); }
+      sel.appendChild(o);
+    });
+  } catch(e) {}
+}
+
+async function loadAll(s) {
+  try {
+    const [teamsD, schedD] = await Promise.all([
+      fetch(`data/${s}/teams.json`).then(r => r.json()),
+      fetch(`data/${s}/schedule.json`).then(r => r.json()),
+    ]);
+    const allTeams = teamsD.teams || [];
+    const team = allTeams.find(t => t.team === teamName || t.team.toUpperCase() === teamName.toUpperCase());
+    if (!team) { document.getElementById('loading').textContent = `Team "${teamName}" not found.`; return; }
+
+    const tn = teamName.toUpperCase();
+    const games = (schedD.games || []).filter(g => (g.home||'').toUpperCase() === tn || (g.away||'').toUpperCase() === tn);
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('content').style.display = '';
+    document.title = `${teamName} — Liollio Analytics`;
+
+    // Build rankings lookup: for each stat key, rank all teams
+    const rankings = buildRankings(allTeams);
+
+    renderHero(team, teamsD.season_label || s);
+    renderSummary(team, rankings);
+    renderStatTables(team, rankings);
+    renderSchedule(games);
+  } catch(e) {
+    document.getElementById('loading').textContent = 'Error loading data.';
+    console.error(e);
+  }
+}
+
+function changeSeason(v) { season = v; loadAll(v); }
+
+// ── Rankings ────────────────────────────────────────────────────────────────
+function buildRankings(teams) {
+  // For each stat, sort teams and record rank (1 = best)
+  // higherBetter: true = rank 1 is highest value; false = rank 1 is lowest value
+  const stats = [
+    {key:'pir',          hb:true},
+    {key:'o_eff',        hb:true},  {key:'d_eff',        hb:false},
+    {key:'net_rtg',      hb:true},  {key:'tempo',        hb:true},
+    {key:'o_efg',        hb:true},  {key:'d_efg',        hb:false},
+    {key:'o_tov_pct',    hb:false}, {key:'d_tov_pct',    hb:true},
+    {key:'o_oreb_pct',   hb:true},  {key:'d_oreb_pct',   hb:false},
+    {key:'o_fta_fga',    hb:true},  {key:'d_fta_fga',    hb:false},
+    {key:'o_3p_pct',     hb:true},  {key:'d_3p_pct',     hb:false},
+    {key:'o_2p_pct',     hb:true},  {key:'d_2p_pct',     hb:false},
+    {key:'o_ft_pct',     hb:true},  {key:'d_ft_pct',     hb:false},
+    {key:'o_blk_pct',    hb:true},  {key:'d_blk_pct',    hb:false},
+    {key:'o_stl_pct',    hb:true},  {key:'d_stl_pct',    hb:false},
+    {key:'o_nstov_pct',  hb:false}, {key:'d_nstov_pct',  hb:true},
+    {key:'o_3pa_fga',    hb:true},  {key:'d_3pa_fga',    hb:true},
+    {key:'o_ast_fgm',    hb:true},  {key:'d_ast_fgm',    hb:true},
+    {key:'o_pts_3_pct',  hb:true},  {key:'d_pts_3_pct',  hb:true},
+    {key:'o_pts_2_pct',  hb:true},  {key:'d_pts_2_pct',  hb:true},
+    {key:'o_pts_ft_pct', hb:true},  {key:'d_pts_ft_pct', hb:true},
+  ];
+
+  const rankMap = {}; // { teamName: { statKey: rank } }
+  teams.forEach(t => { rankMap[t.team] = {}; });
+
+  stats.forEach(({key, hb}) => {
+    const sorted = [...teams]
+      .filter(t => t[key] != null)
+      .sort((a, b) => hb ? b[key] - a[key] : a[key] - b[key]);
+    sorted.forEach((t, i) => {
+      rankMap[t.team][key] = i + 1;
+    });
+  });
+
+  return rankMap;
+}
+
+function getRankClass(rank, total) {
+  const pct = rank / total;
+  if (pct <= 0.25) return 'good';
+  if (pct >= 0.75) return 'bad';
+  return 'mid';
+}
+
+function rankBadge(teamName, key, rankings, total) {
+  const rank = rankings[teamName]?.[key];
+  if (!rank) return '';
+  const cls = getRankClass(rank, total);
+  return `<span class="rk ${cls}">${rank}</span>`;
+}
+
+// ── Hero ─────────────────────────────────────────────────────────────────────
+function renderHero(t, label) {
+  document.getElementById('teamName').textContent = t.team;
+  document.getElementById('teamSub').textContent =
+    `${label} · ${t.gp} games · Liollio Analytics`;
+}
+
+// ── Summary strip ─────────────────────────────────────────────────────────────
+function renderSummary(t, rankings) {
+  const n = Object.keys(rankings).length;
+  const items = [
+    {lbl:'PIR',    val:t.pir,                         cls:'red'},
+    {lbl:'Net Rtg',val:(t.net_rtg>0?'+':'')+t.net_rtg?.toFixed(2), cls:t.net_rtg>0?'pos':'neg'},
+    {lbl:'O Eff',  val:t.o_eff?.toFixed(1)},
+    {lbl:'D Eff',  val:t.d_eff?.toFixed(1)},
+    {lbl:'Tempo',  val:t.tempo?.toFixed(1)},
+    {lbl:'Pts/G',  val:t.pts_pg},
+    {lbl:'Opp/G',  val:t.opp_pts_pg},
+  ];
+  const grid = document.getElementById('summaryGrid');
+  grid.innerHTML = '';
+  items.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'sbox';
+    div.innerHTML = `<div class="lbl">${item.lbl}</div><div class="val ${item.cls||''}">${item.val ?? '—'}</div>`;
+    grid.appendChild(div);
+  });
+}
+
+// ── Stat tables ───────────────────────────────────────────────────────────────
+function renderStatTables(t, rankings) {
+  const n = Object.keys(rankings).length;
+  const rb = (key) => rankBadge(t.team, key, rankings, n);
+  const f1 = v => v != null ? v.toFixed(1) : '—';
+  const f2 = v => v != null ? v.toFixed(2) : '—';
+
+  function row(lbl, oKey, dKey, fmt) {
+    const fmtFn = fmt === 'f2' ? f2 : f1;
+    return `<tr>
+      <td>${lbl}</td>
+      <td class="stat-val">${fmtFn(t[oKey])} ${rb(oKey)}</td>
+      <td class="stat-val">${fmtFn(t[dKey])} ${rb(dKey)}</td>
+    </tr>`;
+  }
+
+  // Efficiency
+  document.getElementById('effBody').innerHTML = `
+    <tr><td>Efficiency</td>
+      <td class="stat-val">${f2(t.o_eff)} ${rb('o_eff')}</td>
+      <td class="stat-val">${f2(t.d_eff)} ${rb('d_eff')}</td>
+    </tr>
+    <tr><td>Net Rating</td>
+      <td class="stat-val" colspan="2">${t.net_rtg > 0 ? '+' : ''}${f2(t.net_rtg)} ${rb('net_rtg')}</td>
+    </tr>
+    <tr><td>Tempo</td>
+      <td class="stat-val" colspan="2">${f1(t.tempo)} ${rb('tempo')}</td>
+    </tr>`;
+
+  // Four Factors
+  document.getElementById('ffBody').innerHTML =
+    row('eFG%',    'o_efg',     'd_efg',     'f1') +
+    row('TO%',     'o_tov_pct', 'd_tov_pct', 'f1') +
+    row('OR%',     'o_oreb_pct','d_oreb_pct','f1') +
+    row('FTA/FGA', 'o_fta_fga', 'd_fta_fga', 'f2');
+
+  // Basics
+  document.getElementById('basicsBody').innerHTML =
+    row('3P%',    'o_3p_pct',   'd_3p_pct',   'f1') +
+    row('2P%',    'o_2p_pct',   'd_2p_pct',   'f1') +
+    row('FT%',    'o_ft_pct',   'd_ft_pct',   'f1') +
+    row('Blk%',   'o_blk_pct',  'd_blk_pct',  'f1') +
+    row('Stl%',   'o_stl_pct',  'd_stl_pct',  'f1') +
+    row('NST%',   'o_nstov_pct','d_nstov_pct','f1');
+
+  // Characteristics
+  document.getElementById('charBody').innerHTML =
+    row('3PA/FGA', 'o_3pa_fga', 'd_3pa_fga', 'f1') +
+    row('Ast/FGM', 'o_ast_fgm', 'd_ast_fgm', 'f1');
+
+  // Point Distribution
+  document.getElementById('pdBody').innerHTML =
+    row('3PT Pts%', 'o_pts_3_pct',  'd_pts_3_pct',  'f1') +
+    row('2PT Pts%', 'o_pts_2_pct',  'd_pts_2_pct',  'f1') +
+    row('FT Pts%',  'o_pts_ft_pct', 'd_pts_ft_pct', 'f1');
+}
+
+// ── Roster ───────────────────────────────────────────────────────────────────
+const RCOLS = [
+  {key:'name',    lbl:'Player',   fmt:'name'},
+  {key:'gp',      lbl:'GP',       fmt:'int'},
+  {key:'min_pg',  lbl:'Min',      fmt:'f1'},
+  {key:'pir',     lbl:'PIR',      fmt:'f1'},
+  {key:'pct_min', lbl:'%Min',     fmt:'f1'},
+  {key:'pts_pg',  lbl:'Pts',      fmt:'f1'},
+  {key:'reb_pg',  lbl:'Reb',      fmt:'f1'},
+  {key:'ast_pg',  lbl:'Ast',      fmt:'f1'},
+  {key:'stl_pg',  lbl:'Stl',      fmt:'f1'},
+  {key:'blk_pg',  lbl:'Blk',      fmt:'f1'},
+  {key:'tov_pg',  lbl:'TOV',      fmt:'f1'},
+  {key:'efg',     lbl:'eFG%',     fmt:'f1'},
+  {key:'ts',      lbl:'TS%',      fmt:'f1'},
+  {key:'fg3m_pg', lbl:'3PM',      fmt:'f1'},
+  {key:'fg3a_pg', lbl:'3PA',      fmt:'f1'},
+  {key:'fg3_pct', lbl:'3P%',      fmt:'f1'},
+  {key:'fg2m_pg', lbl:'2PM',      fmt:'f1'},
+  {key:'fg2a_pg', lbl:'2PA',      fmt:'f1'},
+  {key:'fg2_pct', lbl:'2P%',      fmt:'f1'},
+  {key:'ftm_pg',  lbl:'FTM',      fmt:'f1'},
+  {key:'fta_pg',  lbl:'FTA',      fmt:'f1'},
+  {key:'ft_pct',  lbl:'FT%',      fmt:'f1'},
+];
+
+let rosterSortKey = 'pir', rosterSortDir = 1, currentRoster = [];
+
+function renderRoster(players) {
+  currentRoster = players;
+  buildRosterHeader();
+  renderRosterBody();
+}
+
+function buildRosterHeader() {
+  const hdr = document.getElementById('rosterHdr');
+  hdr.innerHTML = '';
+  RCOLS.forEach(c => {
+    const th = document.createElement('th');
+    th.textContent = c.lbl;
+    if(c.key === 'name') th.style.textAlign = 'left';
+    if(c.key === rosterSortKey){ th.classList.add('sorted'); th.classList.add(rosterSortDir===1?'sort-desc':'sort-asc'); }
+    if(c.key !== 'name') th.addEventListener('click', () => sortRoster(c.key));
+    hdr.appendChild(th);
+  });
+}
+
+function renderRosterBody() {
+  const sorted = [...currentRoster].sort((a,b) => {
+    const av = a[rosterSortKey] ?? -Infinity;
+    const bv = b[rosterSortKey] ?? -Infinity;
+    return rosterSortDir * (bv - av);
+  });
+  const tbody = document.getElementById('rosterBody');
+  tbody.innerHTML = '';
+  sorted.forEach(p => {
+    const tr = document.createElement('tr');
+    RCOLS.forEach(c => {
+      const td = document.createElement('td');
+      if(c.key === 'name'){
+        td.style.textAlign = 'left';
+        td.style.fontFamily = 'var(--font)';
+        td.textContent = p.name || '—';
+      } else if(c.fmt === 'int'){
+        td.textContent = p[c.key] != null ? Math.round(p[c.key]) : '—';
+      } else {
+        td.textContent = p[c.key] != null ? parseFloat(p[c.key]).toFixed(1) : '—';
+      }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+function sortRoster(key) {
+  if(rosterSortKey === key){ rosterSortDir *= -1; } else { rosterSortKey = key; rosterSortDir = 1; }
+  buildRosterHeader();
+  renderRosterBody();
+}
+
+// ── Schedule ─────────────────────────────────────────────────────────────────
+function renderSchedule(games) {
+  const tbody = document.getElementById('schedBody');
+  tbody.innerHTML = '';
+  const sorted = [...games].sort((a, b) => (a.round || 0) - (b.round || 0));
+
+  sorted.forEach(g => {
+    const isHome = (g.home||'').toUpperCase() === teamName.toUpperCase();
+    const opp    = isHome ? g.away : g.home;
+    const tr     = document.createElement('tr');
+
+    if (!g.played) {
+      tr.innerHTML = `
+        <td>${g.round || '—'}</td>
+        <td class="unplayed">${g.date ? formatDate(g.date) : 'TBD'}</td>
+        <td><span class="ha-badge">${isHome ? 'H' : 'A'}</span></td>
+        <td class="opp"><a href="team.html?team=${encodeURIComponent(opp)}">${opp || '—'}</a></td>
+        <td class="r unplayed" colspan="2">—</td>`;
+    } else {
+      const myScore  = isHome ? g.home_score : g.away_score;
+      const oppScore = isHome ? g.away_score : g.home_score;
+      const win      = myScore > oppScore;
+      tr.innerHTML = `
+        <td>${g.round || '—'}</td>
+        <td>${g.date ? formatDate(g.date) : '—'}</td>
+        <td><span class="ha-badge">${isHome ? 'H' : 'A'}</span></td>
+        <td class="opp"><a href="team.html?team=${encodeURIComponent(opp)}">${opp || '—'}</a></td>
+        <td class="r" style="font-weight:500">${myScore} - ${oppScore}</td>
+        <td class="r ${win ? 'w' : 'l'}">${win ? 'W' : 'L'}</td>`;
+    }
+    tbody.appendChild(tr);
+  });
+}
+
+function formatDate(d) {
+  try {
+    const dt = new Date(d);
+    return dt.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+  } catch(e) { return d ? d.slice(0,10) : '—'; }
+}
+
+init();
+</script>
+</body>
+</html>
