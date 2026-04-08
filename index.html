@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liollio Analytics — Euroleague Ratings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #F4F1EA;
+    --bg2:     #EDE9DF;
+    --bg3:     #E4DFD3;
+    --surface: #FDFCF9;
+    --border:  #D4CEC4;
+    --red:     #D0061F;
+    --text:    #18150F;
+    --text2:   #56504A;
+    --text3:   #9A9490;
+    --green:   #0F6130;
+    --neg:     #B8051B;
+    --font:    'IBM Plex Sans', sans-serif;
+    --mono:    'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 15px; }
+  html, body { height: 100%; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font); display: flex; flex-direction: column; min-height: 100vh; }
+
+  /* HEADER */
+  header { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+  .header-inner { max-width: 1500px; margin: 0 auto; padding: 0 20px; display: flex; align-items: center; height: 48px; gap: 32px; }
+  .brand { font-weight: 600; font-size: 1.1rem; color: var(--red); text-decoration: none; letter-spacing: -0.02em; white-space: nowrap; }
+  nav { display: flex; }
+  nav a { font-size: 0.82rem; color: var(--text2); text-decoration: none; padding: 0 12px; height: 48px; display: flex; align-items: center; border-bottom: 2px solid transparent; transition: color 0.12s; }
+  nav a:hover { color: var(--text); }
+  nav a.active { color: var(--red); border-bottom-color: var(--red); font-weight: 500; }
+  .header-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+  .season-sel { font-family: var(--font); font-size: 0.8rem; color: var(--text2); background: var(--bg2); border: 1px solid var(--border); padding: 4px 8px; cursor: pointer; outline: none; }
+  .updated-txt { font-size: 0.72rem; color: var(--text3); font-family: var(--mono); white-space: nowrap; }
+
+  /* PAGE */
+  .page { max-width: 1500px; margin: 0 auto; padding: 0 20px 48px; flex: 1; }
+
+  /* TITLE STRIP */
+  .title-strip { background: var(--bg2); padding: 12px 20px 10px; }
+  .title-strip h1 { font-size: 0.85rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text2); }
+  .title-strip p { font-size: 0.75rem; color: var(--text3); margin-top: 3px; }
+
+  /* CONTROLS */
+  .controls { background: var(--bg3); padding: 7px 20px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .ctrl-label { font-size: 0.72rem; color: var(--text3); padding-right: 4px; }
+  .tog { font-size: 0.72rem; font-family: var(--font); background: var(--bg2); color: var(--text2); border: 1px solid var(--border); padding: 3px 10px; cursor: pointer; transition: background 0.1s, color 0.1s; }
+  .tog.on { background: var(--red); color: #fff; border-color: var(--red); }
+  .tog:hover:not(.on) { background: var(--surface); }
+
+  /* LOADING */
+  .loading { padding: 40px 20px; text-align: center; font-size: 0.85rem; color: var(--text3); font-family: var(--mono); }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; background: var(--surface); }
+  table { width: 100%; min-width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+  thead { position: static; }
+
+  .col-row { border-bottom: 2px solid var(--border); background: var(--bg3); }
+  .col-row th { font-family: var(--mono); font-size: 0.74rem; font-weight: 500; color: var(--text3); text-align: right; padding: 6px 8px; white-space: nowrap; cursor: pointer; user-select: none; border-right: 1px solid var(--border); letter-spacing: 0.02em; }
+  .col-row th:hover { color: var(--text); background: var(--bg2); }
+  .col-row th.sorted { color: var(--red); background: #F9ECED; }
+  .col-row th.sort-desc::after { content: ' ↓'; color: var(--red); }
+  .col-row th.sort-asc::after  { content: ' ↑'; color: var(--red); }
+  .col-row th.team-h { text-align: left; min-width: 190px; }
+  .col-row th.sec { border-left: 2px solid var(--border); }
+
+  tbody tr { border-bottom: 1px solid var(--bg2); transition: background 0.08s; }
+  tbody tr:nth-child(even) { background: #FAFAF6; }
+  tbody tr:hover { background: #F2EFE7 !important; }
+
+  td { padding: 7px 10px; text-align: right; font-family: var(--mono); font-size: 0.82rem; color: var(--text); white-space: nowrap; border-right: 1px solid var(--bg2); }
+  td.rk-col { text-align: center; color: var(--text3); font-size: 0.7rem; width: 32px; }
+  td.team-col { text-align: left; font-family: var(--font); font-weight: 500; font-size: 0.88rem; }
+  td.team-col a { color: var(--text); text-decoration: none; }
+  td.team-col a:hover { color: var(--red); }
+  td.sec { border-left: 2px solid var(--border); }
+  td.pir { font-weight: 600; }
+  .pos { color: var(--green); }
+  .neg { color: var(--neg); }
+
+  /* FOOTER */
+  footer { background: var(--bg2); border-top: 1px solid var(--border); padding: 12px 20px; }
+  .footer-inner { max-width: 1500px; margin: 0 auto; font-size: 0.7rem; color: var(--text3); display: flex; justify-content: space-between; }
+    nav a{padding:0 8px;font-size:0.78rem;}
+    .season-sel{font-size:0.75rem;padding:3px 6px;}
+  }
+
+  /* ── MOBILE ─────────────────────────────────────────── */
+  @media(max-width:640px){
+    html{font-size:13px;}
+    .header-inner{height:44px;gap:0;padding:0 12px;}
+    .brand{font-size:0.9rem;margin-right:8px;white-space:nowrap;}
+    nav a{padding:0 7px;font-size:0.75rem;height:44px;}
+    .header-right{gap:8px;}
+    .season-sel{font-size:0.72rem;padding:3px 5px;}
+    .updated-txt{display:none;}
+    footer{padding:10px 12px;}
+    .footer-inner{flex-direction:column;gap:2px;font-size:0.65rem;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <a class="brand" href="index.html">Liollio Analytics</a>
+    <nav>
+      <a href="index.html" class="active">Ratings</a>
+      <a href="standings.html">Standings</a>
+      <a href="players.html">Players</a>
+    </nav>
+    <div class="header-right">
+      <select class="season-sel" id="seasonSel" onchange="changeSeason(this.value)"></select>
+      <span class="updated-txt" id="updTxt"></span>
+    </div>
+  </div>
+</header>
+
+<div class="page">
+  <div class="title-strip">
+    <h1>Team Ratings &mdash; <span id="seasonLbl">2025-26</span></h1>
+    <p>Click column headers to sort &bull; Click a team name for full team stats</p>
+  </div>
+
+  <div class="controls">
+    <span class="ctrl-label">Columns:</span>
+    <button class="tog on" data-g="efficiency"      onclick="toggleG(this)">Efficiency</button>
+    <button class="tog on" data-g="fourfactors"     onclick="toggleG(this)">Four Factors</button>
+    <button class="tog" data-g="basics"          onclick="toggleG(this)">Basics</button>
+    <button class="tog" data-g="characteristics" onclick="toggleG(this)">Characteristics</button>
+    <button class="tog" data-g="pointdist"       onclick="toggleG(this)">Point Distribution</button>
+  </div>
+
+  <!-- loading sits OUTSIDE table-wrap so it doesn't affect table layout -->
+  <div id="loading" class="loading">Loading data...</div>
+
+  <div class="table-wrap" id="tableWrap" style="display:none">
+    <table id="tbl">
+      <thead>
+        <tr class="col-row" id="colRow"></tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <span>Liollio Analytics &mdash; Euroleague Basketball</span>
+    <span>Data via Euroleague API</span>
+  </div>
+</footer>
+
+<script>
+const COLS = [
+  { key:'rk',            lbl:'RK',       grp:'meta',            fmt:'int',  cls:'rk-col' },
+  { key:'team',          lbl:'Team',     grp:'meta',            fmt:'team', cls:'team-col' },
+  { key:'gp',            lbl:'GP',       grp:'meta',            fmt:'int'  },
+  { key:'pir',           lbl:'PIR',      grp:'meta',            fmt:'f1',   cls:'pir', tip:'Performance Index Rating per game' },
+
+  { key:'o_eff',         lbl:'OEff',    grp:'efficiency',      fmt:'f2',   tip:'Points scored per 100 offensive possessions' },
+  { key:'d_eff',         lbl:'DEff',    grp:'efficiency',      fmt:'f2',   tip:'Points allowed per 100 defensive possessions' },
+  { key:'net_rtg',       lbl:'Net',  grp:'efficiency',      fmt:'f2',   signed:true, tip:'Offensive minus defensive efficiency' },
+  { key:'tempo',         lbl:'Tempo',    grp:'efficiency',      fmt:'f1',   tip:'Defensive possessions per game' },
+
+  { key:'o_efg',         lbl:'OeFG%',   grp:'fourfactors',     fmt:'f1',   tip:'Effective field goal % (offense)' },
+  { key:'d_efg',         lbl:'DeFG%',   grp:'fourfactors',     fmt:'f1',   tip:'Effective field goal % allowed' },
+  { key:'o_tov_pct',     lbl:'OTO%',    grp:'fourfactors',     fmt:'f1',   tip:'Turnover % (offense)' },
+  { key:'d_tov_pct',     lbl:'DTO%',    grp:'fourfactors',     fmt:'f1',   tip:'Turnover % forced' },
+  { key:'o_oreb_pct',    lbl:'OOR%',    grp:'fourfactors',     fmt:'f1',   tip:'Offensive rebound %' },
+  { key:'d_oreb_pct',    lbl:'DOR%',    grp:'fourfactors',     fmt:'f1',   tip:'Opponent offensive rebound % allowed' },
+  { key:'o_fta_fga',     lbl:'OFT/FG',  grp:'fourfactors',     fmt:'f2',   tip:'FT attempts per FG attempt (offense)' },
+  { key:'d_fta_fga',     lbl:'DFT/FG',  grp:'fourfactors',     fmt:'f2',   tip:'Opponent FT rate (defense)' },
+
+  { key:'o_3p_pct',      lbl:'O3P%',    grp:'basics',          fmt:'f1',   tip:'3-point % (offense)' },
+  { key:'d_3p_pct',      lbl:'D3P%',    grp:'basics',          fmt:'f1',   tip:'3-point % allowed' },
+  { key:'o_2p_pct',      lbl:'O2P%',    grp:'basics',          fmt:'f1',   tip:'2-point % (offense)' },
+  { key:'d_2p_pct',      lbl:'D2P%',    grp:'basics',          fmt:'f1',   tip:'2-point % allowed' },
+  { key:'o_ft_pct',      lbl:'OFT%',    grp:'basics',          fmt:'f1',   tip:'Free throw % (offense)' },
+  { key:'d_ft_pct',      lbl:'DFT%',    grp:'basics',          fmt:'f1',   tip:'Opponent free throw %' },
+  { key:'o_blk_pct',     lbl:'OBlk%',   grp:'basics',          fmt:'f1',   tip:'Block % (our blocks / opp FGA)' },
+  { key:'d_blk_pct',     lbl:'DBlk%',   grp:'basics',          fmt:'f1',   tip:'Shots blocked / our FGA' },
+  { key:'o_stl_pct',     lbl:'OStl%',   grp:'basics',          fmt:'f1',   tip:'Steal % (steals / def possessions)' },
+  { key:'d_stl_pct',     lbl:'DStl%',   grp:'basics',          fmt:'f1',   tip:'Opponent steal %' },
+  { key:'o_nstov_pct',   lbl:'ONST%',   grp:'basics',          fmt:'f1',   tip:'Non-steal turnover % (offense)' },
+  { key:'d_nstov_pct',   lbl:'DNST%',   grp:'basics',          fmt:'f1',   tip:'Non-steal turnover % forced' },
+
+  { key:'o_3pa_fga',     lbl:'O3PA%',   grp:'characteristics', fmt:'f1',   tip:'3-point attempt rate (offense)' },
+  { key:'d_3pa_fga',     lbl:'D3PA%',   grp:'characteristics', fmt:'f1',   tip:'Opponent 3-point attempt rate' },
+  { key:'o_ast_fgm',     lbl:'OAst%',   grp:'characteristics', fmt:'f1',   tip:'Assists per FGM (offense)' },
+  { key:'d_ast_fgm',     lbl:'DAst%',   grp:'characteristics', fmt:'f1',   tip:'Opponent assists per FGM' },
+
+  { key:'o_pts_3_pct',   lbl:'O3Pts%', grp:'pointdist',     fmt:'f1',   tip:'% of points from 3-pointers (offense)' },
+  { key:'d_pts_3_pct',   lbl:'D3Pts%', grp:'pointdist',     fmt:'f1',   tip:'% of opponent points from 3-pointers' },
+  { key:'o_pts_2_pct',   lbl:'O2Pts%', grp:'pointdist',     fmt:'f1',   tip:'% of points from 2-pointers (offense)' },
+  { key:'d_pts_2_pct',   lbl:'D2Pts%', grp:'pointdist',     fmt:'f1',   tip:'% of opponent points from 2-pointers' },
+  { key:'o_pts_ft_pct',  lbl:'OFTPts%',  grp:'pointdist',     fmt:'f1',   tip:'% of points from free throws (offense)' },
+  { key:'d_pts_ft_pct',  lbl:'DFTPts%',  grp:'pointdist',     fmt:'f1',   tip:'% of opponent points from free throws' },
+];
+
+const GRP_LABELS = {
+  meta:'', efficiency:'Efficiency', fourfactors:'Four Factors',
+  basics:'Basics', characteristics:'Characteristics', pointdist:'Point Distribution'
+};
+
+let teams = [], sortKey = 'pir', sortDir = -1;
+let vis = { efficiency:true, fourfactors:true, basics:false, characteristics:false, pointdist:false };
+let season = '2025';
+
+async function init() {
+  await loadSeasons();
+  await loadData(season);
+}
+
+async function loadSeasons() {
+  try {
+    const d = await (await fetch('data/seasons.json')).json();
+    const sel = document.getElementById('seasonSel');
+    d.seasons.forEach(s => {
+      const o = document.createElement('option');
+      o.value = s; o.textContent = d.season_labels[s] || s;
+      if (String(s) === String(d.current_season)) { o.selected = true; season = String(s); }
+      sel.appendChild(o);
+    });
+  } catch(e) {}
+}
+
+async function loadData(s) {
+  const loadingEl = document.getElementById('loading');
+  const tableWrap = document.getElementById('tableWrap');
+  loadingEl.style.display = '';
+  tableWrap.style.display = 'none';
+  try {
+    const resp = await fetch(`data/${s}/teams.json`);
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    const d = await resp.json();
+    teams = d.teams || [];
+    document.getElementById('seasonLbl').textContent = d.season_label || s;
+    if (d.updated) {
+      const dt = new Date(d.updated);
+      document.getElementById('updTxt').textContent = 'Updated ' +
+        dt.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' ' +
+        dt.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    }
+    render();
+    loadingEl.style.display = 'none';
+    tableWrap.style.display = '';
+  } catch(e) {
+    loadingEl.textContent = 'Error loading data: ' + e.message;
+  }
+}
+
+function changeSeason(v) {
+  season = v;
+  loadData(v);
+}
+
+function toggleG(btn) {
+  const g = btn.dataset.g;
+  vis[g] = !vis[g];
+  btn.classList.toggle('on', vis[g]);
+  render();
+}
+
+function visCols() {
+  return COLS.filter(c => c.grp === 'meta' || vis[c.grp]);
+}
+
+function render() {
+  renderHeader();
+  renderBody();
+}
+
+function renderHeader() {
+  const cols = visCols();
+  const colRow = document.getElementById('colRow');
+  colRow.innerHTML = '';
+  let seen = {};
+  cols.forEach(c => {
+    const th = document.createElement('th');
+    if (c.grp !== 'meta' && !seen[c.grp]) {
+      th.classList.add('sec');
+      seen[c.grp] = true;
+    }
+    if (c.tip) th.title = c.tip;
+    th.textContent = c.lbl;
+    if (c.grp === 'meta' && c.key === 'team') th.classList.add('team-h');
+    if (c.key === sortKey) { th.classList.add('sorted'); th.classList.add(sortDir === -1 ? 'sort-desc' : 'sort-asc'); }
+    if (c.key !== 'rk') th.addEventListener('click', () => sortBy(c.key));
+    colRow.appendChild(th);
+  });
+}
+
+function renderBody() {
+  const cols = visCols();
+  const sorted = [...teams].sort((a, b) => {
+    const av = a[sortKey] ?? -Infinity, bv = b[sortKey] ?? -Infinity;
+    return sortDir * (av - bv);
+  });
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  sorted.forEach((t, i) => {
+    const tr = document.createElement('tr');
+    let seen = {};
+    cols.forEach(c => {
+      const td = document.createElement('td');
+      if (c.cls) td.classList.add(c.cls);
+      if (c.grp !== 'meta' && !seen[c.grp]) { td.classList.add('sec'); seen[c.grp] = true; }
+      if (c.key === 'rk') {
+        td.textContent = i + 1;
+      } else if (c.key === 'team') {
+        const a = document.createElement('a');
+        a.href = `team.html?team=${encodeURIComponent(t.team)}`;
+        a.textContent = t.team;
+        td.appendChild(a);
+      } else {
+        const v = t[c.key];
+        if (v == null) { td.textContent = '—'; td.style.color = 'var(--text3)'; }
+        else {
+          td.textContent = fmt(v, c.fmt, c.signed);
+          if (c.key === 'net_rtg') td.classList.add(v > 0 ? 'pos' : 'neg');
+        }
+      }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+}
+
+function fmt(v, f, signed) {
+  const s = (signed && v > 0) ? '+' : '';
+  if (f === 'int') return Math.round(v);
+  if (f === 'f1')  return s + v.toFixed(1);
+  if (f === 'f2')  return s + v.toFixed(2);
+  return v;
+}
+
+function sortBy(k) {
+  sortDir = (sortKey === k) ? sortDir * -1 : -1;
+  sortKey = k;
+  render();
+}
+
+init();
+</script>
+</body>
+</html>
